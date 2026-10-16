@@ -3,7 +3,7 @@ package com.pradushkoai.networkscalelabel.domain.model
 /**
  * Параметры подключения к сетевым весам.
  *
- * @param host     IP-адрес весов, например 192.168.140.89
+ * @param host     IP-адрес весов, например 192.168.0.52
  * @param udpPort  UDP-порт весов (по умолчанию для ШТРИХ-ПРИНТ — 1111)
  * @param password пароль администратора, 4 ASCII-цифры (по умолчанию 0030)
  */
@@ -13,7 +13,7 @@ data class ScaleConnectionConfig(
     val password: String,
 ) {
     companion object {
-        const val DEFAULT_HOST: String = "192.168.140.89"
+        const val DEFAULT_HOST: String = "192.168.0.52"
         const val DEFAULT_UDP_PORT: Int = 1111
         const val DEFAULT_PASSWORD: String = "0030"
         const val PASSWORD_LENGTH: Int = 4

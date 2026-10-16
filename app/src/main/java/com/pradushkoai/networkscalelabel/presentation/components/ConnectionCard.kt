@@ -286,7 +286,7 @@ private fun StatusText(
 fun ConnectionCardPreview() {
     NetworkScaleLabelTheme {
         ConnectionCard(
-            host = "192.168.140.89",
+            host = "192.168.0.52",
             port = "1111",
             password = "0030",
             connection = ConnectionState.Disconnected,
