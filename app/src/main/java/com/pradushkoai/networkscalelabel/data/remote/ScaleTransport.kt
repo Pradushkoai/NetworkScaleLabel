@@ -35,7 +35,12 @@ interface ScaleTransportFactory {
 
 /** Настройки UDP-обмена по умолчанию (могут быть переопределены фабрикой). */
 object UdpTransportDefaults {
-    const val TIMEOUT_MS: Int = 1000
+    /**
+     * Таймаут ожидания ответа весов на один запрос, мс.
+     * 3000 мс: UDP-датаграммы теряются, а весы отвечают не мгновенно —
+     * короткий таймаут давал ложные срабатывания «не отвечают».
+     */
+    const val TIMEOUT_MS: Int = 3000
     const val RETRIES: Int = 3
     const val MAX_DATAGRAM: Int = 64 * 1024
 }
