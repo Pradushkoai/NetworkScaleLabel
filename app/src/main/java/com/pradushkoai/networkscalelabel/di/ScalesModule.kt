@@ -1,10 +1,12 @@
 package com.pradushkoai.networkscalelabel.di
 
+import com.pradushkoai.networkscalelabel.data.local.AndroidNetworkInfoProvider
 import com.pradushkoai.networkscalelabel.data.local.ConnectionSettingsStore
 import com.pradushkoai.networkscalelabel.data.remote.ScaleTransportFactory
 import com.pradushkoai.networkscalelabel.data.remote.UdpScaleTransportFactory
 import com.pradushkoai.networkscalelabel.data.repository.ScalesRepositoryImpl
 import com.pradushkoai.networkscalelabel.domain.repository.ConnectionSettingsRepository
+import com.pradushkoai.networkscalelabel.domain.repository.NetworkRepository
 import com.pradushkoai.networkscalelabel.domain.repository.ScalesRepository
 import dagger.Binds
 import dagger.Module
@@ -37,4 +39,8 @@ abstract class ScalesBindsModule {
     @Binds
     @Singleton
     abstract fun bindConnectionSettings(impl: ConnectionSettingsStore): ConnectionSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNetworkRepository(impl: AndroidNetworkInfoProvider): NetworkRepository
 }

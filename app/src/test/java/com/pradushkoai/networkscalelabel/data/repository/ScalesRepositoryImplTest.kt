@@ -5,6 +5,7 @@ import com.pradushkoai.networkscalelabel.data.remote.ScaleTransportFactory
 import com.pradushkoai.networkscalelabel.domain.model.ScaleConnectionConfig
 import com.pradushkoai.networkscalelabel.domain.model.ScaleErrorException
 import com.pradushkoai.networkscalelabel.domain.model.ScaleReadEvent
+import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -94,7 +95,7 @@ class ScalesRepositoryImplTest {
             }
         }
         val factory = RecordingFactory(responder)
-        val repo = ScalesRepositoryImpl(factory)
+        val repo = ScalesRepositoryImpl(factory, mockk(relaxed = true))
 
         val events = repo.readPluDatabase(config).toList()
 
@@ -115,7 +116,7 @@ class ScalesRepositoryImplTest {
             }
         }
         val factory = RecordingFactory(responder)
-        val repo = ScalesRepositoryImpl(factory)
+        val repo = ScalesRepositoryImpl(factory, mockk(relaxed = true))
 
         val events = repo.readPluDatabase(config).toList()
 
@@ -135,7 +136,7 @@ class ScalesRepositoryImplTest {
                 else -> frame(cmdOf(req), 122) // неверный пароль
             }
         }
-        val repo = ScalesRepositoryImpl(RecordingFactory(responder))
+        val repo = ScalesRepositoryImpl(RecordingFactory(responder), mockk(relaxed = true))
 
         try {
             repo.readPluDatabase(config).toList()
@@ -153,7 +154,7 @@ class ScalesRepositoryImplTest {
                 else -> frame(0x00, 121)
             }
         }
-        val repo = ScalesRepositoryImpl(RecordingFactory(responder))
+        val repo = ScalesRepositoryImpl(RecordingFactory(responder), mockk(relaxed = true))
 
         val status = repo.requestStatus(config)
         assertEquals("4.5", status.firmwareVersion)

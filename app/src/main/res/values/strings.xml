@@ -20,6 +20,19 @@
     <string name="status_scale_info">ПО %1$s · исполнение %2$d · № весов %3$d · НПВ %4$d кг</string>
     <string name="status_table_info">Таблица товаров: %1$d ПЛУ · сообщений: %2$d</string>
 
+    <!-- Сеть телефона и поиск весов -->
+    <string name="network_checking">Определяю сеть телефона…</string>
+    <string name="network_info">Сеть телефона: %1$s</string>
+    <string name="network_none">У телефона нет IPv4-адреса — проверьте подключение к Wi-Fi</string>
+    <string name="subnet_mismatch">Внимание: весы %1$s в другой подсети — прямой доступ невозможен. Подключитесь к сети, где стоят весы, или нажмите «Найти весы».</string>
+    <string name="scan_action">Найти весы</string>
+    <string name="scan_running">Идёт поиск весов в сети телефона… (несколько секунд)</string>
+    <string name="scan_found">Найдено весов: %1$d — нажмите на адрес, чтобы подставить его</string>
+    <string name="scan_empty">Весы в подсети телефона не найдены. Проверьте, что весы включены и находятся в одной сети с телефоном (без изоляции клиентов Wi-Fi).</string>
+    <string name="scan_no_network">Нет сети для поиска — подключитесь к Wi-Fi.</string>
+    <string name="scan_host_line">ПО %1$s · № весов %2$d · НПВ %3$d кг</string>
+    <string name="scan_host_current"> — текущий IP</string>
+
     <!-- Чтение базы -->
     <string name="read_action">Считать товары</string>
     <string name="cancel_action">Отмена</string>

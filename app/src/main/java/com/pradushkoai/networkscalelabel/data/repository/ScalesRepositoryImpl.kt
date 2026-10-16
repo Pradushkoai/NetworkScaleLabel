@@ -4,8 +4,11 @@ import com.pradushkoai.networkscalelabel.data.remote.ScaleSession
 import com.pradushkoai.networkscalelabel.data.remote.ScaleSession.PluReadOutcome
 import com.pradushkoai.networkscalelabel.data.remote.ScaleTransportFactory
 import com.pradushkoai.networkscalelabel.data.remote.ShtrihPrintProtocol
+import com.pradushkoai.networkscalelabel.data.remote.UdpScaleScanner
+import com.pradushkoai.networkscalelabel.domain.model.PhoneNetwork
 import com.pradushkoai.networkscalelabel.domain.model.ScaleCommunicationException
 import com.pradushkoai.networkscalelabel.domain.model.ScaleConnectionConfig
+import com.pradushkoai.networkscalelabel.domain.model.ScaleHost
 import com.pradushkoai.networkscalelabel.domain.model.ScaleReadEvent
 import com.pradushkoai.networkscalelabel.domain.model.ScaleStatus
 import com.pradushkoai.networkscalelabel.domain.repository.ScalesRepository
@@ -35,12 +38,18 @@ import kotlinx.coroutines.withContext
 @Singleton
 class ScalesRepositoryImpl @Inject constructor(
     private val transportFactory: ScaleTransportFactory,
+    private val scanner: UdpScaleScanner,
 ) : ScalesRepository {
 
     override suspend fun requestStatus(config: ScaleConnectionConfig): ScaleStatus =
         withContext(Dispatchers.IO) {
             createSession(config).use { session -> session.readStatus() }
         }
+
+    override suspend fun scanForScales(
+        networks: List<PhoneNetwork>,
+        udpPort: Int,
+    ): List<ScaleHost> = withContext(Dispatchers.IO) { scanner.scan(networks, udpPort) }
 
     override fun readPluDatabase(config: ScaleConnectionConfig): Flow<ScaleReadEvent> = flow {
         val startedAt = System.nanoTime()

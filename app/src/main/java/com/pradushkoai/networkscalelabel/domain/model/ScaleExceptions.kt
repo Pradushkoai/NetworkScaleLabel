@@ -5,10 +5,26 @@ package com.pradushkoai.networkscalelabel.domain.model
  * по каждой легко построить пользовательское сообщение.
  */
 
-/** Ошибка обмена: весы не отвечают (таймауты UDP после всех повторов). */
+/** Тип ошибки связи — определяет подсказку для пользователя. */
+enum class ScaleErrorKind {
+    /** Весы не отвечают (таймауты UDP после всех повторов). */
+    TIMEOUT,
+
+    /** Нет сетевого маршрута до весов (устройство в другой подсети). */
+    NO_ROUTE,
+
+    /** Хост отвечает, но UDP-порт закрыт (ICMP «порт недоступен»). */
+    PORT_UNREACHABLE,
+
+    /** Прочая сетевая ошибка. */
+    NETWORK_ERROR,
+}
+
+/** Ошибка обмена: проблема на транспортном уровне. */
 class ScaleCommunicationException(
     message: String,
     cause: Throwable? = null,
+    val kind: ScaleErrorKind = ScaleErrorKind.TIMEOUT,
 ) : Exception(message, cause)
 
 /** Некорректный формат пакета (NAK от весов, мусор в ответе). */

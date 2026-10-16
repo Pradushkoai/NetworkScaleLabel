@@ -1,6 +1,8 @@
 package com.pradushkoai.networkscalelabel.presentation.scales
 
 import com.pradushkoai.networkscalelabel.domain.model.PluRecord
+import com.pradushkoai.networkscalelabel.domain.model.PhoneNetworks
+import com.pradushkoai.networkscalelabel.domain.model.ScaleHost
 import com.pradushkoai.networkscalelabel.domain.model.ScaleStatus
 import com.pradushkoai.networkscalelabel.util.CurrencyFormat
 
@@ -17,6 +19,9 @@ data class ScalesUiState(
     val records: List<PluRecord>,
     val query: String,
     val selected: PluRecord?,
+    val phoneNetworks: PhoneNetworks? = null,
+    val hostOutsideNetworks: Boolean = false,
+    val scanPhase: ScanPhase = ScanPhase.Idle,
 ) {
     companion object {
         fun initial(): ScalesUiState = ScalesUiState(
@@ -43,6 +48,21 @@ sealed interface ConnectionState {
     data class Connected(val status: ScaleStatus) : ConnectionState
 
     data class Failed(val message: String) : ConnectionState
+}
+
+/** Фаза поиска весов в подсети телефона. */
+sealed interface ScanPhase {
+
+    data object Idle : ScanPhase
+
+    data object Scanning : ScanPhase
+
+    /** [hosts] — найденные весы; [wasOnline] — была ли вообще сеть для поиска. */
+    data class Done(
+        val hosts: List<ScaleHost>,
+        val durationMs: Long,
+        val wasOnline: Boolean,
+    ) : ScanPhase
 }
 
 /** Фаза чтения базы товаров. */
