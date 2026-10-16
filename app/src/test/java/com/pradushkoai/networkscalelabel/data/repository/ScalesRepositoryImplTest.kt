@@ -174,7 +174,7 @@ class ScalesRepositoryImplTest {
     }
 
     @Test
-    fun `ранняя остановка после серии пустых ПЛУ`() = runTest {
+    fun `ранняя остановка после двух пустых ПЛУ подряд (умолчание)`() = runTest {
         val responder: (ByteArray) -> ByteArray = { req ->
             when (cmdOf(req)) {
                 0x11 -> frame(0x11, 0, statusData(tableSize = 10_000))
@@ -187,14 +187,15 @@ class ScalesRepositoryImplTest {
         val factory = RecordingFactory(responder)
         val repo = ScalesRepositoryImpl(factory, mockk(relaxed = true))
 
-        val events = repo.readPluDatabase(config, PluReadOptions(earlyStopEmptyStreak = 50)).toList()
+        val events = repo.readPluDatabase(config).toList()
 
         assertTrue(events.any { it is ScaleReadEvent.EarlyStopped })
         val completed = events.last() as ScaleReadEvent.Completed
         assertEquals(1, completed.records.size)
-        // хвост признан пустым после ~54 ПЛУ, а не после всех 10 000
+        // ПЛУ 1 — товар, ПЛУ 2 и дальше — пустые: серии из 2 пустых достаточно,
+        // стоп наступает сразу после первой пачки (6 ПЛУ), а не после всех 10 000
         val asked = factory.transports.single().requests.size - 1 // минус 0x11
-        assertTrue("Опрошено $asked ПЛУ — слишком много для ранней остановки", asked in 51..60)
+        assertTrue("Опрошено $asked ПЛУ — слишком много для ранней остановки", asked in 2..6)
     }
 
     @Test

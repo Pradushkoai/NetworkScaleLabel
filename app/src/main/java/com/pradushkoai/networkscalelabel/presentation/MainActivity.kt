@@ -4,12 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.pradushkoai.networkscalelabel.presentation.scales.ScalesScreen
 import com.pradushkoai.networkscalelabel.presentation.theme.NetworkScaleLabelTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Единственная активити приложения: хостит экран весов.
+ * Единственная активити приложения: корень с двумя вкладками
+ * («Подключение» и «Товары») — см. [AppRoot].
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NetworkScaleLabelTheme {
-                ScalesScreen()
+                AppRoot()
             }
         }
     }

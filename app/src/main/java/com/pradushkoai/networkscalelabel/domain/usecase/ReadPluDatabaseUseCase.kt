@@ -26,6 +26,7 @@ class ReadPluDatabaseUseCase @Inject constructor(
     )
 
     private companion object {
-        const val DEFAULT_EMPTY_STREAK: Int = 50
+        /** Два пустых ПЛУ подряд = конец выгрузки 1С (товары идут с ПЛУ 1 подряд). */
+        const val DEFAULT_EMPTY_STREAK: Int = 2
     }
 }

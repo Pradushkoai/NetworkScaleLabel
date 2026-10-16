@@ -14,12 +14,14 @@ import kotlinx.coroutines.flow.Flow
  * @param interBatchDelayMs       пауза между пачками, мс — чтобы весы продышались.
  * @param earlyStopEmptyStreak    ранняя остановка: сколько ПОДРЯД пустых ПЛУ
  *                                достаточно, чтобы считать хвост таблицы пустым
- *                                (0 — полный проход без ранней остановки).
+ *                                (по умолчанию 2 — товары выгружаются с ПЛУ 1
+ *                                подряд, два пустых подряд = конец выгрузки;
+ *                                0 — полный проход без ранней остановки).
  */
 data class PluReadOptions(
     val batchSize: Int = 6,
     val interBatchDelayMs: Long = 5,
-    val earlyStopEmptyStreak: Int = 50,
+    val earlyStopEmptyStreak: Int = 2,
 )
 
 /**

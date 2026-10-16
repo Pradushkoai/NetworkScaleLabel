@@ -2,12 +2,16 @@ package com.pradushkoai.networkscalelabel.util
 
 /**
  * Форматирование денежных величин из МДЕ (минимальной денежной единицы).
- * По протоколу ШТРИХ-ПРИНТ все цены передаются целыми в МДЕ (для РФ — копейки).
+ * По протоколу ШТРИХ-ПРИНТ все цены передаются целыми в МДЕ
+ * (для BYN — копейки белорусского рубля).
  *
  * Формат детерминирован и не зависит от локали JVM:
  * всегда два знака после запятой, разделитель — запятая, разряды — обычный пробел.
  */
 object CurrencyFormat {
+
+    /** Символ валюты отображения — белорусский рубль (BYN). */
+    const val CURRENCY_SYMBOL: String = "Br"
 
     /** 12345 МДЕ -> "123,45"; 0 МДЕ -> "0,00". */
     fun minorUnitsToRubles(minorUnits: Long): String {
@@ -19,8 +23,9 @@ object CurrencyFormat {
         return "$sign${groupThousands(whole)},$fraction"
     }
 
-    /** 12345 МДЕ -> "123,45 ₽". */
-    fun rublesWithSymbol(minorUnits: Long): String = "${minorUnitsToRubles(minorUnits)} ₽"
+    /** 12345 МДЕ -> "123,45 Br" (белорусский рубль). */
+    fun rublesWithSymbol(minorUnits: Long): String =
+        "${minorUnitsToRubles(minorUnits)} $CURRENCY_SYMBOL"
 
     /** 1234567 -> "1 234 567". */
     private fun groupThousands(value: Long): String {

@@ -3,8 +3,11 @@
     <string name="app_name">СетевыеВесы</string>
     <string name="hello_world">Привет, мир!</string>
 
-    <!-- Заголовок -->
-    <string name="app_title">Сетевые весы ШТРИХ-ПРИНТ</string>
+    <!-- Вкладки -->
+    <string name="tab_connection">Подключение</string>
+    <string name="tab_products">Товары</string>
+    <string name="connection_hint_connected">Весы подключены — переходите на вкладку «Товары» и нажмите «Считать товары».</string>
+    <string name="products_not_connected">Весы не подключены. Перейдите на вкладку «Подключение» и выполните подключение (или «Найти весы»).</string>
 
     <!-- Подключение -->
     <string name="connection_title">Подключение к весам (UDP)</string>
@@ -38,9 +41,9 @@
     <string name="cancel_action">Отмена</string>
     <string name="read_progress">Опрошено %1$d из %2$d · найдено %3$d</string>
     <string name="read_done">Прочитано товаров: %1$d (ошибок обмена: %2$d) за %3$d с</string>
-    <string name="read_done_early">Прочитано товаров: %1$d (ошибок обмена: %2$d) за %3$d с · останов после %4$d ПЛУ: дальше 50 пустых подряд</string>
+    <string name="read_done_early">Прочитано товаров: %1$d (ошибок обмена: %2$d) за %3$d с · останов после %4$d ПЛУ: дальше 2 пустых подряд</string>
     <string name="read_speed">Скорость: %1$d ПЛУ/с</string>
-    <string name="fast_read_label">Быстрое чтение (стоп после 50 пустых ПЛУ подряд)</string>
+    <string name="fast_read_label">Быстрое чтение (стоп после 2 пустых ПЛУ подряд)</string>
     <string name="read_cancelled">Чтение отменено, получено товаров: %1$d</string>
     <string name="read_failed">Чтение прервано: %1$s</string>
 

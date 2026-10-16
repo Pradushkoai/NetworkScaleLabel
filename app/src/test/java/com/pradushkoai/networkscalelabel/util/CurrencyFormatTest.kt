@@ -16,8 +16,8 @@ class CurrencyFormatTest {
     }
 
     @Test
-    fun `цена с символом рубля`() {
-        assertEquals("1 234,56 ₽", CurrencyFormat.rublesWithSymbol(123_456L))
+    fun `цена с символом белорусского рубля`() {
+        assertEquals("1 234,56 Br", CurrencyFormat.rublesWithSymbol(123_456L))
     }
 
     @Test
