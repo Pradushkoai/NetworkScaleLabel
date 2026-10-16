@@ -15,8 +15,8 @@ android {
         applicationId = "com.pradushkoai.networkscalelabel"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.2.0"
+        versionCode = 5
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -53,6 +53,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    testOptions {
+        // android.util.Log в юнит-тестах JVM — no-op вместо "not mocked"
+        // (транспорт логирует фолбэк connect и чужие датаграммы).
+        unitTests.isReturnDefaultValues = true
     }
 }
 
