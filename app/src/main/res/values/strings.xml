@@ -2,4 +2,64 @@
 <resources>
     <string name="app_name">СетевыеВесы</string>
     <string name="hello_world">Привет, мир!</string>
+
+    <!-- Заголовок -->
+    <string name="app_title">Сетевые весы ШТРИХ-ПРИНТ</string>
+
+    <!-- Подключение -->
+    <string name="connection_title">Подключение к весам (UDP)</string>
+    <string name="host_label">IP-адрес весов</string>
+    <string name="port_label">Порт</string>
+    <string name="password_label">Пароль</string>
+    <string name="password_hint">4 цифры, по умолчанию 0030</string>
+    <string name="connect_action">Подключить</string>
+    <string name="status_disconnected">Не подключено. Укажите параметры и нажмите «Подключить».</string>
+    <string name="status_connecting">Подключение…</string>
+    <string name="status_connected">Подключено</string>
+    <string name="status_failed">Ошибка: %1$s</string>
+    <string name="status_scale_info">ПО %1$s · исполнение %2$d · № весов %3$d · НПВ %4$d кг</string>
+    <string name="status_table_info">Таблица товаров: %1$d ПЛУ · сообщений: %2$d</string>
+
+    <!-- Чтение базы -->
+    <string name="read_action">Считать товары</string>
+    <string name="cancel_action">Отмена</string>
+    <string name="read_progress">Опрошено %1$d из %2$d · найдено %3$d</string>
+    <string name="read_done">Прочитано товаров: %1$d (ошибок обмена: %2$d) за %3$d с</string>
+    <string name="read_cancelled">Чтение отменено, получено товаров: %1$d</string>
+    <string name="read_failed">Чтение прервано: %1$s</string>
+
+    <!-- Список товаров -->
+    <string name="search_label">Поиск по названию или коду</string>
+    <string name="list_header">Товары: %1$d (всего в весах: %2$d)</string>
+    <string name="empty_after_read">В весах нет товаров, либо все ПЛУ пусты.</string>
+    <string name="plu_header">ПЛУ %1$d · код %2$d</string>
+    <string name="plu_no_name">(без наименования)</string>
+    <string name="shelf_life_short">срок %1$d дн.</string>
+    <string name="type_piece">штучный</string>
+    <string name="type_weight">весовой</string>
+    <string name="close_action">Закрыть</string>
+
+    <!-- Диалог деталей -->
+    <string name="detail_plu">№ ПЛУ</string>
+    <string name="detail_code">Код товара</string>
+    <string name="detail_price">Цена</string>
+    <string name="detail_type">Тип товара</string>
+    <string name="detail_name1">Наименование, стр. 1</string>
+    <string name="detail_name2">Наименование, стр. 2</string>
+    <string name="detail_shelf_life">Срок годности</string>
+    <string name="detail_days">%1$d дн.</string>
+    <string name="detail_not_set">не задан</string>
+    <string name="detail_tare">Тара</string>
+    <string name="detail_group_code">Групповой код / дата изг.</string>
+    <string name="detail_manufacture_date">Дата изготовления</string>
+    <string name="detail_realization_date">Дата реализации</string>
+    <string name="detail_message">Сообщение</string>
+    <string name="detail_message_no">№ %1$d</string>
+    <string name="detail_images">Изображения (маска)</string>
+    <string name="detail_rostest">Код РОСТЕСТ</string>
+    <string name="detail_label_format">Приоритетный формат этикетки</string>
+    <string name="detail_bc_structure">Приоритетная структура ШК</string>
+    <string name="detail_read_format">Формат чтения</string>
+    <string name="detail_format_ext">расширенный (0x58)</string>
+    <string name="detail_format_base">базовый (0x51)</string>
 </resources>
