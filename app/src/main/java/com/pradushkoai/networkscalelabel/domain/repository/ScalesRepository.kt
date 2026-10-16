@@ -8,6 +8,21 @@ import com.pradushkoai.networkscalelabel.domain.model.ScaleStatus
 import kotlinx.coroutines.flow.Flow
 
 /**
+ * Параметры чтения базы товаров.
+ *
+ * @param batchSize               сколько ПЛУ запрашивается одним «залпом» UDP.
+ * @param interBatchDelayMs       пауза между пачками, мс — чтобы весы продышались.
+ * @param earlyStopEmptyStreak    ранняя остановка: сколько ПОДРЯД пустых ПЛУ
+ *                                достаточно, чтобы считать хвост таблицы пустым
+ *                                (0 — полный проход без ранней остановки).
+ */
+data class PluReadOptions(
+    val batchSize: Int = 6,
+    val interBatchDelayMs: Long = 5,
+    val earlyStopEmptyStreak: Int = 50,
+)
+
+/**
  * Единственный источник истины по обмену с сетевыми весами ШТРИХ-ПРИНТ.
  */
 interface ScalesRepository {
@@ -26,7 +41,10 @@ interface ScalesRepository {
      * Эмитит [ScaleReadEvent]; при фатальной ошибке поток бросает исключение.
      * Сборка потока может быть отменена — чтение остановится между командами.
      */
-    fun readPluDatabase(config: ScaleConnectionConfig): Flow<ScaleReadEvent>
+    fun readPluDatabase(
+        config: ScaleConnectionConfig,
+        options: PluReadOptions = PluReadOptions(),
+    ): Flow<ScaleReadEvent>
 }
 
 /** Локально сохранённые параметры подключения. */

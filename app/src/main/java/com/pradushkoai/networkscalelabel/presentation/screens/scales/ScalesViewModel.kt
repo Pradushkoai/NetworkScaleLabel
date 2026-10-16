@@ -82,6 +82,9 @@ class ScalesViewModel @Inject constructor(
 
     fun onSelectRecord(record: PluRecord?) = update { it.copy(selected = record) }
 
+    /** Тумблер «быстрое чтение» (ранняя остановка по серии пустых ПЛУ). */
+    fun onFastReadChange(enabled: Boolean) = update { it.copy(fastRead = enabled) }
+
     // ------------------------------------------------------------- действия
 
     fun connect() {
@@ -144,16 +147,18 @@ class ScalesViewModel @Inject constructor(
     fun startRead() {
         val config = buildConfig() ?: return
         if (readJob?.isActive == true) return
+        val fastRead = _uiState.value.fastRead
         readJob = viewModelScope.launch {
             update {
                 it.copy(
                     readPhase = ReadPhase.Reading,
                     readProgress = null,
                     records = emptyList(),
+                    earlyStoppedAt = 0,
                 )
             }
             try {
-                readPluDatabase(config)
+                readPluDatabase(config, fastRead)
                     .collect { event ->
                         when (event) {
                             is ScaleReadEvent.Started -> update { st ->
@@ -169,6 +174,9 @@ class ScalesViewModel @Inject constructor(
                                     ),
                                 )
                             }
+                            is ScaleReadEvent.EarlyStopped -> update { st ->
+                                st.copy(earlyStoppedAt = event.processed)
+                            }
                             is ScaleReadEvent.Completed -> update { st ->
                                 st.copy(
                                     records = event.records,
@@ -176,6 +184,7 @@ class ScalesViewModel @Inject constructor(
                                         count = event.records.size,
                                         failedCount = event.failedCount,
                                         durationMs = event.durationMs,
+                                        earlyStoppedAt = st.earlyStoppedAt,
                                     ),
                                     readProgress = null,
                                 )
@@ -189,6 +198,7 @@ class ScalesViewModel @Inject constructor(
                         st.copy(
                             readPhase = ReadPhase.Failed(describeError(e)),
                             readProgress = null,
+                            earlyStoppedAt = 0,
                         )
                     }
                 }
@@ -207,7 +217,9 @@ class ScalesViewModel @Inject constructor(
         }
     }
 
-    fun clearRecords() = update { it.copy(records = emptyList(), readPhase = ReadPhase.Idle, readProgress = null) }
+    fun clearRecords() = update {
+        it.copy(records = emptyList(), readPhase = ReadPhase.Idle, readProgress = null, earlyStoppedAt = 0)
+    }
 
     // ------------------------------------------------------------- приватное
 

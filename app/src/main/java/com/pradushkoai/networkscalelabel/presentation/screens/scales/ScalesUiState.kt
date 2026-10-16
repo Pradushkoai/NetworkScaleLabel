@@ -22,6 +22,9 @@ data class ScalesUiState(
     val phoneNetworks: PhoneNetworks? = null,
     val hostOutsideNetworks: Boolean = false,
     val scanPhase: ScanPhase = ScanPhase.Idle,
+    val fastRead: Boolean = true,
+    /** Не 0 — последнее чтение остановлено по серии пустых ПЛУ (для итоговой строки). */
+    val earlyStoppedAt: Int = 0,
 ) {
     companion object {
         fun initial(): ScalesUiState = ScalesUiState(
@@ -76,6 +79,8 @@ sealed interface ReadPhase {
         val count: Int,
         val failedCount: Int,
         val durationMs: Long,
+        /** Не 0 — чтение остановлено по серии пустых ПЛУ (быстрый режим). */
+        val earlyStoppedAt: Int = 0,
     ) : ReadPhase
 
     data class Cancelled(val count: Int) : ReadPhase

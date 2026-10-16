@@ -28,6 +28,9 @@ class ScaleSession(
         data class OtherError(val code: Int) : PluReadOutcome
     }
 
+    /** Результат чтения одного ПЛУ в составе пачки. */
+    data class BatchPlu(val number: Int, val outcome: PluReadOutcome)
+
     /** 0x11 «Запрос состояния весов» — пароль не требуется. */
     fun readStatus(): ScaleStatus {
         val resp = ShtrihPrintProtocol.parseResponse(
@@ -51,6 +54,64 @@ class ScaleSession(
             transport.transact(ShtrihPrintProtocol.buildGetPluRequest(command, password, number)),
         )
         checkCommand(resp, command)
+        return outcomeOf(resp, extended, number)
+    }
+
+    /**
+     * Пачечное чтение ПЛУ [firstNumber .. firstNumber + count - 1].
+     *
+     * Все запросы отправляются одним «залпом» (весы и локальная сеть сохраняют
+     * порядок датаграмм), ответы принимаются по порядку и сопоставляются
+     * номерам ПЛУ слева направо — в ответе 0x58/0x51 номер ПЛУ отсутствует.
+     *
+     * При потере ответа (пришло меньше, чем отправлено) диапазон целиком
+     * перечитывается поштучно через [readPlu] — это гарантирует корректное
+     * сопоставление ценой скорости на потерянном участке.
+     *
+     * @throws ScaleErrorException при фатальных кодах (121, 122) — как readPlu.
+     */
+    fun readPluBatch(firstNumber: Int, count: Int, extended: Boolean): List<BatchPlu> {
+        require(count > 0) { "Размер пачки должен быть положительным: $count" }
+        val command = if (extended) ShtrihPrintProtocol.CMD_GET_PLU_EX else ShtrihPrintProtocol.CMD_GET_PLU
+
+        // Залп запросов
+        for (n in firstNumber until firstNumber + count) {
+            transport.send(ShtrihPrintProtocol.buildGetPluRequest(command, password, n))
+        }
+
+        // Сбор ответов в порядке прибытия; первый же таймаут — потеря, дальше не ждём
+        val replies = ArrayList<ByteArray>(count)
+        var lost = false
+        for (i in 0 until count) {
+            val raw = transport.tryReceive()
+            if (raw == null) {
+                lost = true
+                break
+            }
+            replies += raw
+        }
+
+        if (!lost && replies.size == count) {
+            return replies.mapIndexed { i, raw ->
+                val resp = ShtrihPrintProtocol.parseResponse(raw)
+                checkCommand(resp, command)
+                BatchPlu(firstNumber + i, outcomeOf(resp, extended, firstNumber + i))
+            }
+        }
+
+        // Часть ответов потерялась — перечитать диапазон поштучно.
+        // Сначала выбросить опоздавшие датаграммы, чтобы не сбить порядок.
+        transport.drain()
+        return (firstNumber until firstNumber + count).map { n -> BatchPlu(n, readPlu(n, extended)) }
+    }
+
+    override fun close() {
+        transport.close()
+    }
+
+    // ------------------------------------------------------------- приватное
+
+    private fun outcomeOf(resp: ShtrihPrintProtocol.Response, extended: Boolean, number: Int): PluReadOutcome {
         return when (val code = resp.errorCode) {
             ShtrihPrintProtocol.ERR_OK -> PluReadOutcome.Found(
                 record = if (extended) {
@@ -66,10 +127,6 @@ class ScaleSession(
             -> throw ScaleErrorException(code)
             else -> PluReadOutcome.OtherError(code)
         }
-    }
-
-    override fun close() {
-        transport.close()
     }
 
     private fun checkCommand(resp: ShtrihPrintProtocol.Response, expected: Int) {

@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -65,6 +67,7 @@ fun ScalesScreen(
         onCancelRead = viewModel::cancelRead,
         onQueryChange = viewModel::onQueryChange,
         onSelectRecord = viewModel::onSelectRecord,
+        onFastReadChange = viewModel::onFastReadChange,
         events = viewModel.events,
     )
 }
@@ -83,6 +86,7 @@ fun ScalesContent(
     onCancelRead: () -> Unit,
     onQueryChange: (String) -> Unit,
     onSelectRecord: (PluRecord?) -> Unit,
+    onFastReadChange: (Boolean) -> Unit = {},
     events: kotlinx.coroutines.flow.SharedFlow<String>,
     modifier: Modifier = Modifier,
 ) {
@@ -138,6 +142,7 @@ fun ScalesContent(
                     state = state,
                     onRead = onRead,
                     onCancelRead = onCancelRead,
+                    onFastReadChange = onFastReadChange,
                 )
             }
 
@@ -182,6 +187,7 @@ private fun ReadActionBlock(
     state: ScalesUiState,
     onRead: () -> Unit,
     onCancelRead: () -> Unit,
+    onFastReadChange: (Boolean) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -207,6 +213,21 @@ private fun ReadActionBlock(
             }
         }
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Switch(
+                checked = state.fastRead,
+                onCheckedChange = onFastReadChange,
+                enabled = state.readPhase !is ReadPhase.Reading,
+            )
+            Text(
+                text = stringResource(R.string.fast_read_label),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
         when (val phase = state.readPhase) {
             is ReadPhase.Reading -> {
                 val progress = state.readProgress
@@ -228,16 +249,37 @@ private fun ReadActionBlock(
                     CircularProgressIndicator(strokeWidth = 2.dp)
                 }
             }
-            is ReadPhase.Done -> Text(
-                text = stringResource(
-                    R.string.read_done,
-                    phase.count,
-                    phase.failedCount,
-                    phase.durationMs / 1000,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            is ReadPhase.Done -> {
+                val seconds = phase.durationMs / 1000
+                val speed = if (seconds > 0) state.earlyStoppedAt / seconds else 0
+                Text(
+                    text = if (phase.earlyStoppedAt > 0) {
+                        stringResource(
+                            R.string.read_done_early,
+                            phase.count,
+                            phase.failedCount,
+                            seconds,
+                            phase.earlyStoppedAt,
+                        )
+                    } else {
+                        stringResource(
+                            R.string.read_done,
+                            phase.count,
+                            phase.failedCount,
+                            seconds,
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                if (phase.earlyStoppedAt > 0 && seconds > 0) {
+                    Text(
+                        text = stringResource(R.string.read_speed, speed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
             is ReadPhase.Cancelled -> Text(
                 text = stringResource(R.string.read_cancelled, phase.count),
                 style = MaterialTheme.typography.bodySmall,

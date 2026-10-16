@@ -13,6 +13,13 @@ sealed interface ScaleReadEvent {
     data class Progress(val processed: Int, val total: Int, val found: Int, val failed: Int) :
         ScaleReadEvent
 
+    /**
+     * Ранняя остановка: [emptyStreak] пустых ПЛУ подряд — хвост таблицы
+     * признан пустым (быстрый режим). Чтение на этом завершается.
+     */
+    data class EarlyStopped(val processed: Int, val total: Int, val emptyStreak: Int) :
+        ScaleReadEvent
+
     /** Чтение завершено успешно. */
     data class Completed(
         val records: List<PluRecord>,

@@ -227,7 +227,7 @@ class ScalesViewModelTest {
     @Test
     fun `чтение базы собирает события в итоговое состояние`() {
         val record = testPlu(1)
-        every { readUseCase(any()) } returns flow {
+        every { readUseCase(any(), any<Boolean>()) } returns flow {
             emit(ScaleReadEvent.Started(total = 3))
             emit(ScaleReadEvent.Progress(processed = 1, total = 3, found = 1, failed = 0))
             emit(ScaleReadEvent.Completed(listOf(record), failedCount = 0, durationMs = 5_000))
@@ -245,7 +245,7 @@ class ScalesViewModelTest {
 
     @Test
     fun `сбой чтения переводит фазу в Failed`() {
-        every { readUseCase(any()) } returns flow {
+        every { readUseCase(any(), any<Boolean>()) } returns flow {
             emit(ScaleReadEvent.Started(total = 3))
             throw ScaleCommunicationException("связь оборвалась")
         }

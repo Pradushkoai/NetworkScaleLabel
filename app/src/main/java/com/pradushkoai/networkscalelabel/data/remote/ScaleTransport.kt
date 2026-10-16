@@ -26,6 +26,28 @@ interface ScaleTransport : Closeable {
      * как есть — их разбирает протокольный уровень.
      */
     fun transact(request: ByteArray): ByteArray
+
+    /**
+     * Отправляет запрос, НЕ ожидая ответа (для пачечного режима: несколько
+     * запросов «в полёте», ответы собираются [tryReceive] в порядке FIFO).
+     */
+    fun send(request: ByteArray)
+
+    /**
+     * Пытается принять один ответ. Возвращает null по таймауту soTimeout.
+     * Прочие сетевые сбои переводятся в [ScaleCommunicationException].
+     */
+    fun tryReceive(): ByteArray?
+
+    /**
+     * Выбрасывает «зависшие» в буфере датаграммы (опоздавшие ответы прошлых
+     * пачек), чтобы они не сбивали следующий обмен. Ждёт до [timeoutMs].
+     */
+    fun drain(timeoutMs: Int = DRAIN_TIMEOUT_MS)
+
+    companion object {
+        const val DRAIN_TIMEOUT_MS: Int = 150
+    }
 }
 
 /** Фабрика транспортов по параметрам подключения. */
@@ -120,6 +142,68 @@ class UdpScaleTransport(
                     e,
                     ScaleErrorKind.NETWORK_ERROR,
                 )
+            }
+        }
+    }
+
+    override fun send(request: ByteArray) {
+        try {
+            socket.send(DatagramPacket(request, request.size, address, port))
+        } catch (e: IOException) {
+            throw ScaleCommunicationException(
+                "Сетевая ошибка при отправке запроса весам $address:$port: " +
+                    "${e.message ?: e.javaClass.simpleName}",
+                e,
+                ScaleErrorKind.NETWORK_ERROR,
+            )
+        }
+    }
+
+    override fun tryReceive(): ByteArray? {
+        val buf = ByteArray(maxDatagram)
+        val incoming = DatagramPacket(buf, buf.size)
+        return try {
+            socket.receive(incoming)
+            buf.copyOf(incoming.length)
+        } catch (_: SocketTimeoutException) {
+            null
+        } catch (e: PortUnreachableException) {
+            throw ScaleCommunicationException(
+                "Хост $address доступен, но UDP-порт $port закрыт " +
+                    "(получен ICMP «порт недоступен»). Проверьте порт.",
+                e,
+                ScaleErrorKind.PORT_UNREACHABLE,
+            )
+        } catch (e: IOException) {
+            throw ScaleCommunicationException(
+                "Сетевая ошибка при приёме ответа весов $address:$port: " +
+                    "${e.message ?: e.javaClass.simpleName}",
+                e,
+                ScaleErrorKind.NETWORK_ERROR,
+            )
+        }
+    }
+
+    override fun drain(timeoutMs: Int) {
+        val oldTimeout = socket.soTimeout
+        try {
+            socket.soTimeout = timeoutMs
+            val buf = ByteArray(maxDatagram)
+            while (true) {
+                val incoming = DatagramPacket(buf, buf.size)
+                try {
+                    socket.receive(incoming)
+                } catch (_: SocketTimeoutException) {
+                    return
+                } catch (_: IOException) {
+                    return
+                }
+            }
+        } finally {
+            try {
+                socket.soTimeout = oldTimeout
+            } catch (_: IOException) {
+                // сокет закрыт — не важно
             }
         }
     }
